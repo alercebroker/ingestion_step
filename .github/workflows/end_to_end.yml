@@ -7,11 +7,8 @@ on:
 
 jobs:
   end_to_end:
+    name: Create dev image and push to ghcr
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      packages: read
-      contents: read
 
     steps:
       - name: Check out the repo
@@ -24,6 +21,7 @@ jobs:
           VERSION=dev
           TAGS="${DOCKER_IMAGE}:${VERSION}"
           echo ::set-output name=tags::${TAGS}
+          echo $TAGS
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
