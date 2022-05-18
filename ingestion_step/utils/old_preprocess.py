@@ -409,23 +409,21 @@ def preprocess_objects_(objects, light_curves, alerts, magstats, version):
     oids = objects.oid.unique()
     extra_fields = list(alerts["extra_fields"].values)
     extra_fields = pd.DataFrame(extra_fields, index=alerts.index)
-    alerts = alerts.join(extra_fields)
-    alerts = alerts.loc[
-        :, ["oid", "ndethist", "ncovhist", "jdstarthist", "jdendhist"]
-    ]
-    alerts.drop(columns=["oid"], inplace=True)
+    last_alerts = alerts.join(extra_fields)
+    last_alerts = last_alerts.loc[:, ["oid", "ndethist", "ncovhist", "jdstarthist", "jdendhist"]]
+    last_alerts.drop_duplicates("oid", inplace=True, keep="last")
+    last_alerts.set_index("oid", inplace=True, drop=True)
     detections = light_curves["detections"].drop(
         columns=["ndethist", "ncovhist", "jdstarthist", "jdendhist"]
     )
-    detections_last_alert = detections.join(alerts)
-    detections_last_alert["objectId"] = detections_last_alert.oid
-    detections_last_alert.drop_duplicates(["candid", "oid"], inplace=True)
-    detections_last_alert.reset_index(inplace=True)
-    magstats["objectId"] = magstats.oid
+    detections.set_index("oid", inplace=True, drop=True)
+    detections_last_alerts = detections.join(last_alerts)
+    detections_last_alerts.reset_index(inplace=True)
+    detections_last_alerts.drop_duplicates(["candid", "oid"], inplace=True)
+    detections_last_alerts["objectId"] = detections_last_alerts["oid"]
+    magstats["objectId"] = magstats["oid"]
 
-    new_objects = object_stats_df(
-        detections_last_alert, magstats, step_name=version
-    )
+    new_objects = object_stats_df(detections_last_alerts, magstats, step_name=version)
     new_objects.reset_index(inplace=True)
 
     new_names = dict(
@@ -439,8 +437,7 @@ def preprocess_objects_(objects, light_curves, alerts, magstats, version):
     new_objects.rename(columns={"objectId": "oid", **new_names}, inplace=True)
     new_objects["new"] = ~new_objects.oid.isin(oids)
     new_objects["deltajd"] = new_objects["deltamjd"]
-
-    detections_last_alert.drop(columns=["objectId"], inplace=True)
+    detections_last_alerts.drop(columns=["objectId"], inplace=True)
     magstats.drop(columns=["objectId"], inplace=True)
 
     return new_objects

@@ -623,15 +623,15 @@ class IngestionStep(GenericStep):
     # TEMPORAL CODE
     def execute_psql(
         self,
-        alerts: pd.DataFrame,
-        detections: pd.DataFrame,
-        non_detections_prv_candidates: pd.DataFrame,
+        alerts: pd.DataFrame,  # raw alerts
+        detections: pd.DataFrame,  # detections -> corrected new detections + prev detections
+        non_detections_prv_candidates: pd.DataFrame,  # new non detections
     ):
         # Get just ZTF objects
         alerts = alerts[alerts["tid"] == "ZTF"]
         # No alerts of ZTF on the batch, continue
         if len(alerts) == 0:
-            return
+            return pd.DataFrame()
         self.logger.info("Working on PSQL")
         detections = detections[detections["tid"] == "ZTF"]
         non_detections_prv_candidates = non_detections_prv_candidates[
@@ -639,9 +639,9 @@ class IngestionStep(GenericStep):
         ]
 
         # Reset all indexes
-        alerts.reset_index(inplace=True)
-        detections.reset_index(inplace=True)
-        non_detections_prv_candidates.reset_index(inplace=True)
+        alerts.reset_index(inplace=True, drop=True)
+        detections.reset_index(inplace=True, drop=True)
+        non_detections_prv_candidates.reset_index(inplace=True, drop=True)
         # Get unique oids for ZTF
         unique_oids = alerts["oid"].unique().tolist()
         # Create a new dataframe with extra fields and remove it from detections
@@ -670,7 +670,7 @@ class IngestionStep(GenericStep):
         # GAIA
         gaia = get_catalog(unique_oids, "Gaia_ztf", self.driver)
         gaia = preprocess_gaia(gaia, detections)
-        # Get historic
+        # Get historic + new points on each lc
         light_curves = self.preprocess_lightcurves(
             detections, non_detections_prv_candidates, engine="psql"
         )
