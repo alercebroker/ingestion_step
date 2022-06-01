@@ -540,7 +540,7 @@ class IngestionStep(GenericStep):
             if "ZTF" == idx:
                 self.detections_corrector.strategy = ZTFCorrectionStrategy()
             else:
-                self.detections_corrector.strategy = FallbackCorrectionStrategy
+                self.detections_corrector.strategy = FallbackCorrectionStrategy()
             corrected = self.detections_corrector.compute(gdf)
             response.append(corrected)
         response = pd.concat(response, ignore_index=True)
