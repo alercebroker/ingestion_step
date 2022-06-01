@@ -1,2 +1,2 @@
-from .atlas_correction_strategy import ATLASCorrectionStrategy
+from .fallback_correction_strategy import FallbackCorrectionStrategy
 from .ztf_correction_strategy import ZTFCorrectionStrategy

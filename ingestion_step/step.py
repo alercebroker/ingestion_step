@@ -6,12 +6,12 @@ from ingestion_step.utils.multi_driver.connection import MultiDriverConnection
 from .utils.constants import DET_KEYS, OBJ_KEYS, NON_DET_KEYS, OLD_DET_KEYS
 from .utils.prv_candidates.processor import Processor
 from .utils.prv_candidates.strategies import (
-    ATLASPrvCandidatesStrategy,
+    FallbackPrvCandidatesStrategy,
     ZTFPrvCandidatesStrategy,
 )
 from .utils.correction.corrector import Corrector
 from .utils.correction.strategies import (
-    ATLASCorrectionStrategy,
+    FallbackCorrectionStrategy,
     ZTFCorrectionStrategy,
 )
 from .utils.old_preprocess import (
@@ -513,12 +513,10 @@ class IngestionStep(GenericStep):
                 self.prv_candidates_processor.strategy = (
                     ZTFPrvCandidatesStrategy()
                 )
-            elif "ATLAS" in tid:
-                self.prv_candidates_processor.strategy = (
-                    ATLASPrvCandidatesStrategy()
-                )
             else:
-                raise ValueError(f"Unknown Survey {tid}")
+                self.prv_candidates_processor.strategy = (
+                    FallbackPrvCandidatesStrategy()
+                )
             det, non_det = self.prv_candidates_processor.compute(subset_data)
             detections.append(det)
             non_detections.append(non_det)
@@ -541,10 +539,8 @@ class IngestionStep(GenericStep):
         for idx, gdf in detections.groupby("tid"):
             if "ZTF" == idx:
                 self.detections_corrector.strategy = ZTFCorrectionStrategy()
-            elif "ATLAS" in idx:
-                self.detections_corrector.strategy = ATLASCorrectionStrategy()
             else:
-                raise ValueError(f"Unknown Survey {idx}")
+                self.detections_corrector.strategy = FallbackCorrectionStrategy
             corrected = self.detections_corrector.compute(gdf)
             response.append(corrected)
         response = pd.concat(response, ignore_index=True)
