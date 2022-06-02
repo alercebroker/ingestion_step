@@ -8,6 +8,7 @@ from .utils.prv_candidates.processor import Processor
 from .utils.prv_candidates.strategies import (
     FallbackPrvCandidatesStrategy,
     ZTFPrvCandidatesStrategy,
+    LSSTPrvCandidatesStrategy
 )
 from .utils.correction.corrector import Corrector
 from .utils.correction.strategies import (
@@ -512,6 +513,10 @@ class IngestionStep(GenericStep):
             if tid == "ZTF":
                 self.prv_candidates_processor.strategy = (
                     ZTFPrvCandidatesStrategy()
+                )
+            elif tid == "LSST":
+                self.prv_candidates_processor.strategy = (
+                    LSSTPrvCandidatesStrategy()
                 )
             else:
                 self.prv_candidates_processor.strategy = (
