@@ -54,12 +54,12 @@ class LSSTPreviousCandidatesParser(SurveyParser):
         prv_content["e_ra"] = 0.001
         prv_content["e_dec"] = 0.001
         prv_content["pid"] = 0
-        prv_content['fid'] = cls._fid_mapper[prv_candidate["filterName"]]
+        prv_content["fid"] = cls._fid_mapper[prv_candidate["filterName"]]
         return prv_content
 
     @classmethod
     def can_parse(cls, message: dict) -> bool:
-        return 'diaSource' in message.keys()
+        return "diaSource" in message.keys()
 
     @classmethod
     def parse(cls, messages: List[dict]) -> List[dict]:

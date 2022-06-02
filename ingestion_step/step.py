@@ -8,7 +8,7 @@ from .utils.prv_candidates.processor import Processor
 from .utils.prv_candidates.strategies import (
     FallbackPrvCandidatesStrategy,
     ZTFPrvCandidatesStrategy,
-    LSSTPrvCandidatesStrategy
+    LSSTPrvCandidatesStrategy,
 )
 from .utils.correction.corrector import Corrector
 from .utils.correction.strategies import (
