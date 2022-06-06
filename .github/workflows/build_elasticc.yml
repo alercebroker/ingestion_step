@@ -2,7 +2,7 @@ name: build_elasticc_image
 on:
   push:
     branches:
-      - fork/elasticc_project
+      - elasticc
 
 jobs:
   get_tags:
