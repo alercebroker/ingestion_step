@@ -91,7 +91,17 @@ DETECTIONS = {
                 "name": "extra_fields",
                 "type": {
                     "type": "map",
-                    "values": ["string", "int", "null", "float", "boolean", "double"],
+                    "values": [
+                        "string",
+                        "int",
+                        "null",
+                        "float",
+                        "boolean",
+                        "double",
+                        {
+                            "type": "map", "values": ["string", "float", "null", "int"],
+                        }
+                    ],
                 },
             },
         ],

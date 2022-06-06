@@ -1,2 +1,3 @@
-from .atlas_prv_candidates_strategy import ATLASPrvCandidatesStrategy
+from .fallback_prv_candidates_strategy import FallbackPrvCandidatesStrategy
 from .ztf_prv_candidates_strategy import ZTFPrvCandidatesStrategy
+from .lsst_prv_candidates_strategy import LSSTPrvCandidatesStrategy
