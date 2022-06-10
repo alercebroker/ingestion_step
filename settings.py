@@ -23,6 +23,9 @@ DB_CONFIG = {
         "PASSWORD": os.getenv("MONGO_PASSWORD", None),
         "PORT": int(os.getenv("MONGO_PORT", 27017)),
         "DATABASE": os.getenv("MONGO_NAME", None),
+        "REPLICA_SET": "rs0",
+        "READ_PREFERENCE": "secondaryPreferred",
+        "RETRY_WRITES": False
     },
 }
 
