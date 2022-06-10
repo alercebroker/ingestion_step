@@ -19,7 +19,7 @@ DB_CONFIG = {
     },
     "MONGO": {
         "HOST": os.getenv("MONGO_HOST", None),
-        "USER": os.getenv("MONGO_USER", None),
+        "USERNAME": os.getenv("MONGO_USER", None),
         "PASSWORD": os.getenv("MONGO_PASSWORD", None),
         "PORT": int(os.getenv("MONGO_PORT", 27017)),
         "DATABASE": os.getenv("MONGO_NAME", None),
