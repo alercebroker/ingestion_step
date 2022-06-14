@@ -273,7 +273,7 @@ class IngestionStep(GenericStep):
         df_mjd = df.mjd
         idx_min = df_mjd.values.argmin()
         df_min = df.iloc[idx_min]
-        df_ra = df["ra"]
+        df_ra = np.abs(df["ra"])
         df_dec = df["dec"]
         df_e_ra = df["e_ra"]
         df_e_dec = df["e_dec"]
