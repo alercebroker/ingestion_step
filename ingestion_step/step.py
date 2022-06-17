@@ -802,9 +802,7 @@ class IngestionStep(GenericStep):
         alerts = pd.DataFrame(messages)
         # If is an empiric alert must has stamp
         alerts["has_stamp"] = True
-        alerts["alertId"] = alerts["extra_fields"].map(
-            lambda x: x["alertId"] if "alertId" in x.keys() else None
-        )
+        alerts["alertId"] = alerts["extra_fields"].map(lambda x: x["alertId"]).astype(int)
         # Process previous candidates of each alert
         (
             dets_from_prv_candidates,
