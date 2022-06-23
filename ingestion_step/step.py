@@ -599,6 +599,9 @@ class IngestionStep(GenericStep):
             key_alert = alerts[alerts[key] == _key]
             candid = key_alert["candid"].values[-1]
             alert_id = key_alert["alertId"].values[-1]
+            publish_timestamp = key_alert["elasticcPublishTimestamp"].values[-1]
+            ingest_timestamp = key_alert["brokerIngestTimestamp"].values[-1]
+
             mask_detections = light_curves["detections"][key] == _key
             detections = light_curves["detections"].loc[mask_detections]
             detections.replace({np.nan: None}, inplace=True)
@@ -618,6 +621,8 @@ class IngestionStep(GenericStep):
                 "detections": detections,
                 "non_detections": non_detections,
                 "metadata": metadata_,
+                "elasticcPublishTimestamp": publish_timestamp,
+                "brokerIngestTimestamp": ingest_timestamp
             }
             self.producer.produce(output_message, key=aid)
             n_messages += 1
@@ -803,6 +808,7 @@ class IngestionStep(GenericStep):
         # If is an empiric alert must has stamp
         alerts["has_stamp"] = True
         alerts["alertId"] = alerts["extra_fields"].map(lambda x: x["alertId"]).astype(int)
+        print(alerts)
         # Process previous candidates of each alert
         (
             dets_from_prv_candidates,

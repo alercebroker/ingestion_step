@@ -137,5 +137,7 @@ SCHEMA = {
         {"name": "detections", "type": DETECTIONS},
         {"name": "non_detections", "type": NON_DETECTIONS},
         {"name": "metadata", "type": [METADATA, "null"]},
+        {"name": "elasticcPublishTimestamp", "type": "long"},
+        {"name": "brokerIngestTimestamp", "type": "long"},
     ],
 }
