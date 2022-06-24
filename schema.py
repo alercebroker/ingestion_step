@@ -123,6 +123,7 @@ NON_DETECTIONS = {
     },
 }
 
+
 SCHEMA = {
     "doc": "Multi stream light curve",
     "name": "alerce.light_curve",
@@ -137,7 +138,7 @@ SCHEMA = {
         {"name": "detections", "type": DETECTIONS},
         {"name": "non_detections", "type": NON_DETECTIONS},
         {"name": "metadata", "type": [METADATA, "null"]},
-        {"name": "elasticcPublishTimestamp", "type": "long"},
-        {"name": "brokerIngestTimestamp", "type": "long"},
+        {"name": "elasticcPublishTimestamp", "type": {"type": "long", "logicalType": "timestamp-millis"}},
+        {"name": "brokerIngestTimestamp", "type": {"type": "long", "logicalType": "timestamp-millis"}}
     ],
 }
