@@ -808,7 +808,6 @@ class IngestionStep(GenericStep):
         # If is an empiric alert must has stamp
         alerts["has_stamp"] = True
         alerts["alertId"] = alerts["extra_fields"].map(lambda x: x["alertId"]).astype(int)
-        print(alerts)
         # Process previous candidates of each alert
         (
             dets_from_prv_candidates,
