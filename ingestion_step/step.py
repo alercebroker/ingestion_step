@@ -1,3 +1,5 @@
+import pickle
+
 from apf.core.step import GenericStep
 from apf.producers import KafkaProducer
 
@@ -553,6 +555,14 @@ class IngestionStep(GenericStep):
         response = pd.concat(response, ignore_index=True)
         return response
 
+    @staticmethod
+    def get_forced_photometry(data: dict) -> [None, List[dict]]:
+        data = data["prvDiaForcedSources"]
+        response = None
+        if data:
+            response = pickle.loads(data)
+        return response
+
     def produce(
         self,
         alerts: pd.DataFrame,
@@ -579,28 +589,24 @@ class IngestionStep(GenericStep):
         # remove unused columns
         light_curves["detections"].drop(columns=["new"], inplace=True)
         light_curves["non_detections"].drop(columns=["new"], inplace=True)
+        alerts["forced_sources"] = alerts["extra_fields"].apply(self.get_forced_photometry)
         # sort by ascending mjd
         objects.sort_values("lastmjd", inplace=True, ascending=True)
         self.logger.info(f"Checking {len(objects)} messages (key={key})")
         n_messages = 0
-
-        for index, row in objects.iterrows():
+        objects.set_index(key, inplace=True)
+        for index, row in alerts.iterrows():
             _key = row[key]
             aid = row["aid"]
-            oids = row["oid"]
+            oid = row["oid"]
 
             metadata_ = None
             if metadata is not None:
-                for o in oids:
-                    if o in metadata.index:
-                        metadata_ = metadata.loc[o].to_dict()
-                        break
+                if oid in metadata.index:
+                    metadata_ = metadata.loc[oid].to_dict()
 
-            key_alert = alerts[alerts[key] == _key]
-            candid = key_alert["candid"].values[-1]
-            alert_id = key_alert["alertId"].values[-1]
-            publish_timestamp = key_alert["elasticcPublishTimestamp"].values[-1]
-            ingest_timestamp = key_alert["brokerIngestTimestamp"].values[-1]
+            publish_timestamp = row["elasticcPublishTimestamp"]
+            ingest_timestamp = row["brokerIngestTimestamp"]
 
             mask_detections = light_curves["detections"][key] == _key
             detections = light_curves["detections"].loc[mask_detections]
@@ -611,18 +617,20 @@ class IngestionStep(GenericStep):
                 mask_non_detections
             ]
             non_detections = non_detections.to_dict("records")
+            the_object = objects.loc[_key]
             output_message = {
                 "aid": str(aid),
-                "alertId": str(alert_id),
-                "meanra": row["meanra"],
-                "meandec": row["meandec"],
-                "ndet": row["ndet"],
-                "candid": str(candid),
+                "alertId": str(row["alertId"]),
+                "meanra": the_object["meanra"],
+                "meandec": the_object["meandec"],
+                "ndet": the_object["ndet"],
+                "candid": row["candid"],
                 "detections": detections,
                 "non_detections": non_detections,
+                "forced_sources": row["forced_sources"],
                 "metadata": metadata_,
                 "elasticcPublishTimestamp": publish_timestamp,
-                "brokerIngestTimestamp": ingest_timestamp
+                "brokerIngestTimestamp": ingest_timestamp,
             }
             self.producer.produce(output_message, key=aid)
             n_messages += 1
