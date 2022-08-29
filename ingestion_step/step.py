@@ -589,7 +589,9 @@ class IngestionStep(GenericStep):
         # remove unused columns
         light_curves["detections"].drop(columns=["new"], inplace=True)
         light_curves["non_detections"].drop(columns=["new"], inplace=True)
-        alerts["forced_sources"] = alerts["extra_fields"].apply(self.get_forced_photometry)
+        alerts["forced_sources"] = alerts["extra_fields"].apply(
+            self.get_forced_photometry
+        )
         # sort by ascending mjd
         objects.sort_values("lastmjd", inplace=True, ascending=True)
         self.logger.info(f"Checking {len(objects)} messages (key={key})")
@@ -815,7 +817,9 @@ class IngestionStep(GenericStep):
         alerts = pd.DataFrame(messages)
         # If is an empiric alert must has stamp
         alerts["has_stamp"] = True
-        alerts["alertId"] = alerts["extra_fields"].map(lambda x: x["alertId"]).astype(int)
+        alerts["alertId"] = (
+            alerts["extra_fields"].map(lambda x: x["alertId"]).astype(int)
+        )
         # Process previous candidates of each alert
         (
             dets_from_prv_candidates,
