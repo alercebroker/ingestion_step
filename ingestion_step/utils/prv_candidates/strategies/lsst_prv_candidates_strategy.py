@@ -118,10 +118,16 @@ class LSSTPrvCandidatesStrategy(BasePrvCandidatesStrategy):
             list(detections.values())
         )
         detections = pd.DataFrame(detections)
-        forced_phot_sources = pd.DataFrame(forced_phot_sources).rename(columns=FORCED_PHOT_TO_NON_DET) \
-            if len(forced_phot_sources) \
+        forced_phot_sources = (
+            pd.DataFrame(forced_phot_sources).rename(
+                columns=FORCED_PHOT_TO_NON_DET
+            )
+            if len(forced_phot_sources)
             else pd.DataFrame(columns=NON_DET_KEYS)
-        forced_phot_sources["fid"] = forced_phot_sources["fid"].apply(lambda x: self._fid_mapper[x])
+        )
+        forced_phot_sources["fid"] = forced_phot_sources["fid"].apply(
+            lambda x: self._fid_mapper[x]
+        )
         forced_phot_sources["tid"] = self._source
         forced_phot_sources["oid"] = forced_phot_sources["oid"].astype(str)
         forced_phot_sources["aid"] = forced_phot_sources["oid"]
