@@ -124,26 +124,6 @@ NON_DETECTIONS = {
     },
 }
 
-FORCED_SOURCES = {
-    "type": "array",
-    "items": {
-        "name": "forced_sources_record",
-        "type": "record",
-        "fields": [
-            {"name": "diaForcedSourceId", "type": "long"},
-            {"name": "ccdVisitId", "type": "long"},
-            {"name": "diaObjectId", "type": "long"},
-            {"name": "midPointTai", "type": "double"},
-            {"name": "filterName", "type": "string"},
-            {"name": "psFlux", "type": "float"},
-            {"name": "psFluxErr", "type": "float"},
-            {"name": "totFlux", "type": "float"},
-            {"name": "totFluxErr", "type": "float"}
-        ],
-    },
-}
-
-
 SCHEMA = {
     "doc": "Multi stream light curve",
     "name": "alerce.light_curve",
@@ -157,7 +137,6 @@ SCHEMA = {
         {"name": "ndet", "type": "int"},
         {"name": "detections", "type": DETECTIONS},
         {"name": "non_detections", "type": NON_DETECTIONS},
-        {"name": "forced_sources", "type": [FORCED_SOURCES, "null"]},
         {"name": "metadata", "type": [METADATA, "null"]},
         {"name": "elasticcPublishTimestamp", "type": "long"},
         {"name": "brokerIngestTimestamp", "type": "long"}

@@ -555,14 +555,6 @@ class IngestionStep(GenericStep):
         response = pd.concat(response, ignore_index=True)
         return response
 
-    @staticmethod
-    def get_forced_photometry(data: dict) -> [None, List[dict]]:
-        data = data["prvDiaForcedSources"]
-        response = None
-        if data:
-            response = pickle.loads(data)
-        return response
-
     def produce(
         self,
         alerts: pd.DataFrame,
@@ -589,9 +581,6 @@ class IngestionStep(GenericStep):
         # remove unused columns
         light_curves["detections"].drop(columns=["new"], inplace=True)
         light_curves["non_detections"].drop(columns=["new"], inplace=True)
-        alerts["forced_sources"] = alerts["extra_fields"].apply(
-            self.get_forced_photometry
-        )
         # sort by ascending mjd
         objects.sort_values("lastmjd", inplace=True, ascending=True)
         self.logger.info(f"Checking {len(objects)} messages (key={key})")
@@ -629,7 +618,6 @@ class IngestionStep(GenericStep):
                 "candid": row["candid"],
                 "detections": detections,
                 "non_detections": non_detections,
-                "forced_sources": row["forced_sources"],
                 "metadata": metadata_,
                 "elasticcPublishTimestamp": publish_timestamp,
                 "brokerIngestTimestamp": ingest_timestamp,
@@ -817,9 +805,7 @@ class IngestionStep(GenericStep):
         alerts = pd.DataFrame(messages)
         # If is an empiric alert must has stamp
         alerts["has_stamp"] = True
-        alerts["alertId"] = (
-            alerts["extra_fields"].map(lambda x: x["alertId"]).astype(int)
-        )
+        alerts["alertId"] = alerts["extra_fields"].map(lambda x: x["alertId"])
         # Process previous candidates of each alert
         (
             dets_from_prv_candidates,

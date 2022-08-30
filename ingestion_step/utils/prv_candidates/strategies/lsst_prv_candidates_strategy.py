@@ -7,6 +7,12 @@ import pickle
 
 # Keys used on non detections for ZTF
 NON_DET_KEYS = ["aid", "tid", "oid", "mjd", "diffmaglim", "fid"]
+FORCED_PHOT_TO_NON_DET = {
+    "filterName": "fid",
+    "diaObjectId": "oid",
+    "midPointTai": "mjd",
+    "psFlux": "diffmaglim",
+}
 
 
 class LSSTPreviousCandidatesParser(SurveyParser):
@@ -67,8 +73,19 @@ class LSSTPreviousCandidatesParser(SurveyParser):
 
 
 class LSSTPrvCandidatesStrategy(BasePrvCandidatesStrategy):
+    _source = "LSST"
+    _fid_mapper = {
+        "u": 0,
+        "g": 1,
+        "r": 2,
+        "i": 3,
+        "z": 4,
+        "Y": 5,
+    }
+
     def process_prv_candidates(self, alerts: pd.DataFrame):
         detections = {}
+        forced_phot_sources = []
         for index, alert in alerts.iterrows():
             oid = alert["oid"]
             tid = alert["tid"]
@@ -91,10 +108,21 @@ class LSSTPrvCandidatesStrategy(BasePrvCandidatesStrategy):
                         }
                     )
                 del alert["extra_fields"]["prvDiaSources"]
+            if alert["extra_fields"]["prvDiaForcedSources"] is not None:
+                data = alert["extra_fields"]["prvDiaForcedSources"]
+                forced_phot = pickle.loads(data)
+                forced_phot_sources += forced_phot
+                del alert["extra_fields"]["prvDiaForcedSources"]
+
         detections = LSSTPreviousCandidatesParser.parse(
             list(detections.values())
         )
         detections = pd.DataFrame(detections)
-        non_detections = pd.DataFrame(columns=NON_DET_KEYS)
-
-        return detections, non_detections
+        forced_phot_sources = pd.DataFrame(forced_phot_sources).rename(columns=FORCED_PHOT_TO_NON_DET) \
+            if len(forced_phot_sources) \
+            else pd.DataFrame(columns=NON_DET_KEYS)
+        forced_phot_sources["fid"] = forced_phot_sources["fid"].apply(lambda x: self._fid_mapper[x])
+        forced_phot_sources["tid"] = self._source
+        forced_phot_sources["oid"] = forced_phot_sources["oid"].astype(str)
+        forced_phot_sources["aid"] = forced_phot_sources["oid"]
+        return detections, forced_phot_sources
