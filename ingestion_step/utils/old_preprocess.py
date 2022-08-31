@@ -1,27 +1,19 @@
 # Based on https://github.com/alercebroker/correction_step/blob/main/correction/step.py
-import pandas as pd
-import numpy as np
 import warnings
-
-from ingestion_step.utils.multi_driver.connection import MultiDriverConnection
-from ingestion_step.utils.constants import (
-    DATAQUALITY_KEYS,
-    SS_KEYS,
-    REFERENCE_KEYS,
-    PS1_KEYS,
-    GAIA_KEYS,
-    MAGSTATS_TRANSLATE,
-    MAGSTATS_UPDATE_KEYS,
-)
 from typing import List
-from lc_correction.compute import (
-    apply_mag_stats,
-    get_flag_reference,
-    get_flag_saturation,
-    do_dmdt,
-    apply_objstats_from_correction,
-    apply_objstats_from_magstats,
-)
+
+import numpy as np
+import pandas as pd
+from lc_correction.compute import (apply_mag_stats,
+                                   apply_objstats_from_correction,
+                                   apply_objstats_from_magstats, do_dmdt,
+                                   get_flag_reference, get_flag_saturation)
+
+from ingestion_step.utils.constants import (DATAQUALITY_KEYS, GAIA_KEYS,
+                                            MAGSTATS_TRANSLATE,
+                                            MAGSTATS_UPDATE_KEYS, PS1_KEYS,
+                                            REFERENCE_KEYS, SS_KEYS)
+from ingestion_step.utils.multi_driver.connection import MultiDriverConnection
 
 
 # TEMPORAL CODE

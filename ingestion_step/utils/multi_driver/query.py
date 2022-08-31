@@ -1,12 +1,12 @@
-from db_plugins.db.generic import BaseQuery
-from db_plugins.db.mongo import MongoConnection
-from db_plugins.db.sql import SQLConnection
 from typing import List
-from sqlalchemy import and_
-from sqlalchemy.sql.expression import bindparam
 
 import db_plugins.db.mongo.models as mongo_models
 import db_plugins.db.sql.models as psql_models
+from db_plugins.db.generic import BaseQuery
+from db_plugins.db.mongo import MongoConnection
+from db_plugins.db.sql import SQLConnection
+from sqlalchemy import and_
+from sqlalchemy.sql.expression import bindparam
 
 MODELS = {
     "psql": {

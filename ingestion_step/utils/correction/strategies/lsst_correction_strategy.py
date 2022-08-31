@@ -4,7 +4,7 @@ from .base_correction_strategy import BaseCorrectionStrategy
 
 
 class LSSTCorrectionStrategy(BaseCorrectionStrategy):
-    _factor = 10 ** (-3.9/2.5)
+    _factor = 10 ** (-3.9 / 2.5)
 
     def do_correction(self, detections: pd.DataFrame) -> pd.DataFrame:
         detections["corrected"] = True

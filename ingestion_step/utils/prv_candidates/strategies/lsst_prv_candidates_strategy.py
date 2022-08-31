@@ -1,9 +1,10 @@
-from .base_prv_candidates_strategy import BasePrvCandidatesStrategy
+import pickle
 from typing import List
-from survey_parser_plugins.core import SurveyParser
 
 import pandas as pd
-import pickle
+from survey_parser_plugins.core import SurveyParser
+
+from .base_prv_candidates_strategy import BasePrvCandidatesStrategy
 
 # Keys used on non detections for ZTF
 NON_DET_KEYS = ["aid", "tid", "oid", "mjd", "diffmaglim", "fid"]
@@ -75,7 +76,7 @@ class LSSTPreviousCandidatesParser(SurveyParser):
 
 class LSSTPrvCandidatesStrategy(BasePrvCandidatesStrategy):
     _source = "LSST"
-    _factor = 10 ** (-3.9/2.5)
+    _factor = 10 ** (-3.9 / 2.5)
     _fid_mapper = {
         "u": 0,
         "g": 1,
@@ -107,7 +108,7 @@ class LSSTPrvCandidatesStrategy(BasePrvCandidatesStrategy):
                                 "aid": aid,
                                 "diaSource": prv,
                                 "parent_candid": candid,
-                                "alertId": alert_id
+                                "alertId": alert_id,
                             }
                         }
                     )
@@ -136,7 +137,11 @@ class LSSTPrvCandidatesStrategy(BasePrvCandidatesStrategy):
         forced_phot_sources["oid"] = forced_phot_sources["oid"].astype(str)
         forced_phot_sources["aid"] = forced_phot_sources["oid"]
 
-        forced_phot_sources["diffmaglim"] = forced_phot_sources["diffmaglim"] * self._factor
-        forced_phot_sources["psFluxErr"] = forced_phot_sources["psFluxErr"] * self._factor
+        forced_phot_sources["diffmaglim"] = (
+            forced_phot_sources["diffmaglim"] * self._factor
+        )
+        forced_phot_sources["psFluxErr"] = (
+            forced_phot_sources["psFluxErr"] * self._factor
+        )
 
         return detections, forced_phot_sources

@@ -1,47 +1,31 @@
+import logging
 import pickle
+import sys
+from typing import List, Tuple
 
+import numpy as np
+import pandas as pd
 from apf.core.step import GenericStep
 from apf.producers import KafkaProducer
 
 from ingestion_step.utils.multi_driver.connection import MultiDriverConnection
 
-from .utils.constants import DET_KEYS, OBJ_KEYS, NON_DET_KEYS, OLD_DET_KEYS
-from .utils.prv_candidates.processor import Processor
-from .utils.prv_candidates.strategies import (
-    FallbackPrvCandidatesStrategy,
-    ZTFPrvCandidatesStrategy,
-    LSSTPrvCandidatesStrategy,
-)
+from .utils.constants import DET_KEYS, NON_DET_KEYS, OBJ_KEYS, OLD_DET_KEYS
 from .utils.correction.corrector import Corrector
-from .utils.correction.strategies import (
-    FallbackCorrectionStrategy,
-    ZTFCorrectionStrategy,
-    LSSTCorrectionStrategy,
-)
-from .utils.old_preprocess import (
-    get_catalog,
-    preprocess_dataquality,
-    insert_dataquality,
-    preprocess_ss,
-    insert_ss,
-    preprocess_reference,
-    insert_reference,
-    preprocess_ps1,
-    insert_ps1,
-    preprocess_gaia,
-    insert_gaia,
-    do_magstats,
-    insert_magstats,
-    do_flags,
-    compute_dmdt,
-    preprocess_objects_,
-)
-from typing import Tuple, List
-
-import numpy as np
-import pandas as pd
-import logging
-import sys
+from .utils.correction.strategies import (FallbackCorrectionStrategy,
+                                          LSSTCorrectionStrategy,
+                                          ZTFCorrectionStrategy)
+from .utils.old_preprocess import (compute_dmdt, do_flags, do_magstats,
+                                   get_catalog, insert_dataquality,
+                                   insert_gaia, insert_magstats, insert_ps1,
+                                   insert_reference, insert_ss,
+                                   preprocess_dataquality, preprocess_gaia,
+                                   preprocess_objects_, preprocess_ps1,
+                                   preprocess_reference, preprocess_ss)
+from .utils.prv_candidates.processor import Processor
+from .utils.prv_candidates.strategies import (FallbackPrvCandidatesStrategy,
+                                              LSSTPrvCandidatesStrategy,
+                                              ZTFPrvCandidatesStrategy)
 
 sys.path.insert(0, "../../../../")
 pd.options.mode.chained_assignment = None

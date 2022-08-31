@@ -1,9 +1,10 @@
-from .base_prv_candidates_strategy import BasePrvCandidatesStrategy
+import pickle
 from typing import List
-from survey_parser_plugins.core import SurveyParser
 
 import pandas as pd
-import pickle
+from survey_parser_plugins.core import SurveyParser
+
+from .base_prv_candidates_strategy import BasePrvCandidatesStrategy
 
 # Keys used on non detections for ZTF
 NON_DET_KEYS = ["aid", "tid", "oid", "mjd", "diffmaglim", "fid"]
