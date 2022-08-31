@@ -586,7 +586,9 @@ class IngestionStep(GenericStep):
         n_messages = 0
         objects.set_index(key, inplace=True)
 
-        alerts = alerts.sort_values(by=["mjd"]).drop_duplicates(subset=["aid"], keep="last")
+        alerts = alerts.sort_values(by=["mjd"]).drop_duplicates(
+            subset=["aid"], keep="last"
+        )
 
         for index, row in alerts.iterrows():
             _key = row[key]
