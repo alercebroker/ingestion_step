@@ -4,15 +4,24 @@ from typing import List
 
 import numpy as np
 import pandas as pd
-from lc_correction.compute import (apply_mag_stats,
-                                   apply_objstats_from_correction,
-                                   apply_objstats_from_magstats, do_dmdt,
-                                   get_flag_reference, get_flag_saturation)
+from lc_correction.compute import (
+    apply_mag_stats,
+    apply_objstats_from_correction,
+    apply_objstats_from_magstats,
+    do_dmdt,
+    get_flag_reference,
+    get_flag_saturation,
+)
 
-from ingestion_step.utils.constants import (DATAQUALITY_KEYS, GAIA_KEYS,
-                                            MAGSTATS_TRANSLATE,
-                                            MAGSTATS_UPDATE_KEYS, PS1_KEYS,
-                                            REFERENCE_KEYS, SS_KEYS)
+from ingestion_step.utils.constants import (
+    DATAQUALITY_KEYS,
+    GAIA_KEYS,
+    MAGSTATS_TRANSLATE,
+    MAGSTATS_UPDATE_KEYS,
+    PS1_KEYS,
+    REFERENCE_KEYS,
+    SS_KEYS,
+)
 from ingestion_step.utils.multi_driver.connection import MultiDriverConnection
 
 

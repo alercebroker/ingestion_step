@@ -12,20 +12,35 @@ from ingestion_step.utils.multi_driver.connection import MultiDriverConnection
 
 from .utils.constants import DET_KEYS, NON_DET_KEYS, OBJ_KEYS, OLD_DET_KEYS
 from .utils.correction.corrector import Corrector
-from .utils.correction.strategies import (FallbackCorrectionStrategy,
-                                          LSSTCorrectionStrategy,
-                                          ZTFCorrectionStrategy)
-from .utils.old_preprocess import (compute_dmdt, do_flags, do_magstats,
-                                   get_catalog, insert_dataquality,
-                                   insert_gaia, insert_magstats, insert_ps1,
-                                   insert_reference, insert_ss,
-                                   preprocess_dataquality, preprocess_gaia,
-                                   preprocess_objects_, preprocess_ps1,
-                                   preprocess_reference, preprocess_ss)
+from .utils.correction.strategies import (
+    FallbackCorrectionStrategy,
+    LSSTCorrectionStrategy,
+    ZTFCorrectionStrategy,
+)
+from .utils.old_preprocess import (
+    compute_dmdt,
+    do_flags,
+    do_magstats,
+    get_catalog,
+    insert_dataquality,
+    insert_gaia,
+    insert_magstats,
+    insert_ps1,
+    insert_reference,
+    insert_ss,
+    preprocess_dataquality,
+    preprocess_gaia,
+    preprocess_objects_,
+    preprocess_ps1,
+    preprocess_reference,
+    preprocess_ss,
+)
 from .utils.prv_candidates.processor import Processor
-from .utils.prv_candidates.strategies import (FallbackPrvCandidatesStrategy,
-                                              LSSTPrvCandidatesStrategy,
-                                              ZTFPrvCandidatesStrategy)
+from .utils.prv_candidates.strategies import (
+    FallbackPrvCandidatesStrategy,
+    LSSTPrvCandidatesStrategy,
+    ZTFPrvCandidatesStrategy,
+)
 
 sys.path.insert(0, "../../../../")
 pd.options.mode.chained_assignment = None
