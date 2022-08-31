@@ -1,2 +1,3 @@
 from .fallback_correction_strategy import FallbackCorrectionStrategy
 from .ztf_correction_strategy import ZTFCorrectionStrategy
+from .lsst_correction_strategy import LSSTCorrectionStrategy

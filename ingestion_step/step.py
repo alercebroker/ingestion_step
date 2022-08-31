@@ -16,6 +16,7 @@ from .utils.correction.corrector import Corrector
 from .utils.correction.strategies import (
     FallbackCorrectionStrategy,
     ZTFCorrectionStrategy,
+    LSSTCorrectionStrategy,
 )
 from .utils.old_preprocess import (
     get_catalog,
@@ -506,9 +507,7 @@ class IngestionStep(GenericStep):
         # dicto = {
         #     "ZTF": ZTFPrvCandidatesStrategy()
         # }
-        data = alerts[
-            ["aid", "oid", "tid", "candid", "ra", "dec", "pid", "extra_fields"]
-        ]
+        data = alerts.copy()
         detections = []
         non_detections = []
         for tid, subset_data in data.groupby("tid"):
@@ -546,6 +545,8 @@ class IngestionStep(GenericStep):
         for idx, gdf in detections.groupby("tid"):
             if "ZTF" == idx:
                 self.detections_corrector.strategy = ZTFCorrectionStrategy()
+            elif "LSST" == idx:
+                self.detections_corrector.strategy = LSSTCorrectionStrategy()
             else:
                 self.detections_corrector.strategy = (
                     FallbackCorrectionStrategy()

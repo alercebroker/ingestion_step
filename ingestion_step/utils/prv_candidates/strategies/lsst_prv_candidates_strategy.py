@@ -61,6 +61,7 @@ class LSSTPreviousCandidatesParser(SurveyParser):
         prv_content["e_dec"] = 0.001
         prv_content["pid"] = 0
         prv_content["fid"] = cls._fid_mapper[prv_candidate["filterName"]]
+        prv_content["alertId"] = message["alertId"]
         return prv_content
 
     @classmethod
@@ -74,6 +75,7 @@ class LSSTPreviousCandidatesParser(SurveyParser):
 
 class LSSTPrvCandidatesStrategy(BasePrvCandidatesStrategy):
     _source = "LSST"
+    _factor = 10 ** (-3.9/2.5)
     _fid_mapper = {
         "u": 0,
         "g": 1,
@@ -90,6 +92,7 @@ class LSSTPrvCandidatesStrategy(BasePrvCandidatesStrategy):
             oid = alert["oid"]
             tid = alert["tid"]
             aid = alert["aid"]
+            alert_id = alert["alertId"]
             candid = alert["candid"]
             if alert["extra_fields"]["prvDiaSources"] is not None:
                 prv_candidates = pickle.loads(
@@ -104,6 +107,7 @@ class LSSTPrvCandidatesStrategy(BasePrvCandidatesStrategy):
                                 "aid": aid,
                                 "diaSource": prv,
                                 "parent_candid": candid,
+                                "alertId": alert_id
                             }
                         }
                     )
@@ -131,4 +135,8 @@ class LSSTPrvCandidatesStrategy(BasePrvCandidatesStrategy):
         forced_phot_sources["tid"] = self._source
         forced_phot_sources["oid"] = forced_phot_sources["oid"].astype(str)
         forced_phot_sources["aid"] = forced_phot_sources["oid"]
+
+        forced_phot_sources["diffmaglim"] = forced_phot_sources["diffmaglim"] * self._factor
+        forced_phot_sources["psFluxErr"] = forced_phot_sources["psFluxErr"] * self._factor
+
         return detections, forced_phot_sources
