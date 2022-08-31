@@ -1,5 +1,4 @@
 import logging
-import pickle
 import sys
 from typing import List, Tuple
 
@@ -586,6 +585,9 @@ class IngestionStep(GenericStep):
         self.logger.info(f"Checking {len(objects)} messages (key={key})")
         n_messages = 0
         objects.set_index(key, inplace=True)
+
+        alerts = alerts.sort_values(by=["mjd"]).drop_duplicates(subset=["aid"], keep="last")
+
         for index, row in alerts.iterrows():
             _key = row[key]
             aid = row["aid"]
