@@ -98,6 +98,7 @@ DETECTIONS = {
                         "float",
                         "boolean",
                         "double",
+                        "bytes",
                         {
                             "type": "map", "values": ["string", "float", "null", "int"],
                         }
@@ -122,7 +123,6 @@ NON_DETECTIONS = {
         ],
     },
 }
-
 
 SCHEMA = {
     "doc": "Multi stream light curve",

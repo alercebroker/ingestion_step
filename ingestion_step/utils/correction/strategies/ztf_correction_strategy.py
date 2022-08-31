@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
+from lc_correction.compute import DISTANCE_THRESHOLD, correction, is_dubious
 
 from .base_correction_strategy import BaseCorrectionStrategy
-from lc_correction.compute import correction, is_dubious, DISTANCE_THRESHOLD
 
 
 class ZTFCorrectionStrategy(BaseCorrectionStrategy):

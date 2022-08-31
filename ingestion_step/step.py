@@ -1,44 +1,45 @@
+import logging
+import sys
+from typing import List, Tuple
+
+import numpy as np
+import pandas as pd
 from apf.core.step import GenericStep
 from apf.producers import KafkaProducer
 
 from ingestion_step.utils.multi_driver.connection import MultiDriverConnection
 
-from .utils.constants import DET_KEYS, OBJ_KEYS, NON_DET_KEYS, OLD_DET_KEYS
-from .utils.prv_candidates.processor import Processor
-from .utils.prv_candidates.strategies import (
-    FallbackPrvCandidatesStrategy,
-    ZTFPrvCandidatesStrategy,
-    LSSTPrvCandidatesStrategy,
-)
+from .utils.constants import DET_KEYS, NON_DET_KEYS, OBJ_KEYS, OLD_DET_KEYS
 from .utils.correction.corrector import Corrector
 from .utils.correction.strategies import (
     FallbackCorrectionStrategy,
+    LSSTCorrectionStrategy,
     ZTFCorrectionStrategy,
 )
 from .utils.old_preprocess import (
-    get_catalog,
-    preprocess_dataquality,
-    insert_dataquality,
-    preprocess_ss,
-    insert_ss,
-    preprocess_reference,
-    insert_reference,
-    preprocess_ps1,
-    insert_ps1,
-    preprocess_gaia,
-    insert_gaia,
-    do_magstats,
-    insert_magstats,
-    do_flags,
     compute_dmdt,
+    do_flags,
+    do_magstats,
+    get_catalog,
+    insert_dataquality,
+    insert_gaia,
+    insert_magstats,
+    insert_ps1,
+    insert_reference,
+    insert_ss,
+    preprocess_dataquality,
+    preprocess_gaia,
     preprocess_objects_,
+    preprocess_ps1,
+    preprocess_reference,
+    preprocess_ss,
 )
-from typing import Tuple, List
-
-import numpy as np
-import pandas as pd
-import logging
-import sys
+from .utils.prv_candidates.processor import Processor
+from .utils.prv_candidates.strategies import (
+    FallbackPrvCandidatesStrategy,
+    LSSTPrvCandidatesStrategy,
+    ZTFPrvCandidatesStrategy,
+)
 
 sys.path.insert(0, "../../../../")
 pd.options.mode.chained_assignment = None
@@ -504,9 +505,7 @@ class IngestionStep(GenericStep):
         # dicto = {
         #     "ZTF": ZTFPrvCandidatesStrategy()
         # }
-        data = alerts[
-            ["aid", "oid", "tid", "candid", "ra", "dec", "pid", "extra_fields"]
-        ]
+        data = alerts.copy()
         detections = []
         non_detections = []
         for tid, subset_data in data.groupby("tid"):
@@ -544,6 +543,8 @@ class IngestionStep(GenericStep):
         for idx, gdf in detections.groupby("tid"):
             if "ZTF" == idx:
                 self.detections_corrector.strategy = ZTFCorrectionStrategy()
+            elif "LSST" == idx:
+                self.detections_corrector.strategy = LSSTCorrectionStrategy()
             else:
                 self.detections_corrector.strategy = (
                     FallbackCorrectionStrategy()
@@ -583,24 +584,24 @@ class IngestionStep(GenericStep):
         objects.sort_values("lastmjd", inplace=True, ascending=True)
         self.logger.info(f"Checking {len(objects)} messages (key={key})")
         n_messages = 0
+        objects.set_index(key, inplace=True)
 
-        for index, row in objects.iterrows():
+        alerts = alerts.sort_values(by=["mjd"]).drop_duplicates(
+            subset=["aid"], keep="last"
+        )
+
+        for index, row in alerts.iterrows():
             _key = row[key]
             aid = row["aid"]
-            oids = row["oid"]
+            oid = row["oid"]
 
             metadata_ = None
             if metadata is not None:
-                for o in oids:
-                    if o in metadata.index:
-                        metadata_ = metadata.loc[o].to_dict()
-                        break
+                if oid in metadata.index:
+                    metadata_ = metadata.loc[oid].to_dict()
 
-            key_alert = alerts[alerts[key] == _key]
-            candid = key_alert["candid"].values[-1]
-            alert_id = key_alert["alertId"].values[-1]
-            publish_timestamp = key_alert["elasticcPublishTimestamp"].values[-1]
-            ingest_timestamp = key_alert["brokerIngestTimestamp"].values[-1]
+            publish_timestamp = row["elasticcPublishTimestamp"]
+            ingest_timestamp = row["brokerIngestTimestamp"]
 
             mask_detections = light_curves["detections"][key] == _key
             detections = light_curves["detections"].loc[mask_detections]
@@ -611,18 +612,19 @@ class IngestionStep(GenericStep):
                 mask_non_detections
             ]
             non_detections = non_detections.to_dict("records")
+            the_object = objects.loc[_key]
             output_message = {
                 "aid": str(aid),
-                "alertId": str(alert_id),
-                "meanra": row["meanra"],
-                "meandec": row["meandec"],
-                "ndet": row["ndet"],
-                "candid": str(candid),
+                "alertId": str(row["alertId"]),
+                "meanra": the_object["meanra"],
+                "meandec": the_object["meandec"],
+                "ndet": the_object["ndet"],
+                "candid": row["candid"],
                 "detections": detections,
                 "non_detections": non_detections,
                 "metadata": metadata_,
                 "elasticcPublishTimestamp": publish_timestamp,
-                "brokerIngestTimestamp": ingest_timestamp
+                "brokerIngestTimestamp": ingest_timestamp,
             }
             self.producer.produce(output_message, key=aid)
             n_messages += 1
@@ -807,7 +809,7 @@ class IngestionStep(GenericStep):
         alerts = pd.DataFrame(messages)
         # If is an empiric alert must has stamp
         alerts["has_stamp"] = True
-        alerts["alertId"] = alerts["extra_fields"].map(lambda x: x["alertId"]).astype(int)
+        alerts["alertId"] = alerts["extra_fields"].map(lambda x: x["alertId"])
         # Process previous candidates of each alert
         (
             dets_from_prv_candidates,

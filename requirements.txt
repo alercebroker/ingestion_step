@@ -6,4 +6,4 @@ pymongo
 
 git+https://github.com/alercebroker/lc_correction
 git+https://github.com/alercebroker/survey-parser-plugins@elasticc
-git+https://github.com/alercebroker/db-plugins@feature/mongo-connection-arguments
+git+https://github.com/alercebroker/db-plugins

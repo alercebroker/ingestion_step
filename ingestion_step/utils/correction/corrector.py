@@ -1,6 +1,8 @@
 from __future__ import annotations
-from .strategies.base_correction_strategy import BaseCorrectionStrategy
+
 import pandas as pd
+
+from .strategies.base_correction_strategy import BaseCorrectionStrategy
 
 
 class Corrector:
