@@ -85,6 +85,7 @@ class LSSTPrvCandidatesStrategy(BasePrvCandidatesStrategy):
         "z": 4,
         "Y": 5,
     }
+    _extra_fields = ["diaForcedSourceId", "ccdVisitId", "psFluxErr", "totFlux", "totFluxErr"]
 
     def process_prv_candidates(self, alerts: pd.DataFrame):
         detections = {}
@@ -123,6 +124,7 @@ class LSSTPrvCandidatesStrategy(BasePrvCandidatesStrategy):
             list(detections.values())
         )
         detections = pd.DataFrame(detections)
+        # The forced photometry is carried in non_detections fields
         forced_phot_sources = (
             pd.DataFrame(forced_phot_sources).rename(
                 columns=FORCED_PHOT_TO_NON_DET
@@ -130,6 +132,7 @@ class LSSTPrvCandidatesStrategy(BasePrvCandidatesStrategy):
             if len(forced_phot_sources)
             else pd.DataFrame(columns=NON_DET_KEYS)
         )
+        # Process some fields of forced photometry
         forced_phot_sources["fid"] = forced_phot_sources["fid"].apply(
             lambda x: self._fid_mapper[x]
         )
@@ -143,5 +146,6 @@ class LSSTPrvCandidatesStrategy(BasePrvCandidatesStrategy):
         forced_phot_sources["psFluxErr"] = (
             forced_phot_sources["psFluxErr"] * self._factor
         )
-
+        forced_phot_sources["extra_fields"] = forced_phot_sources[self._extra_fields].to_dict("records")
+        forced_phot_sources.drop(columns=self._extra_fields, inplace=True)
         return detections, forced_phot_sources
