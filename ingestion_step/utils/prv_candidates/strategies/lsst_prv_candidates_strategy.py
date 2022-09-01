@@ -152,7 +152,9 @@ class LSSTPrvCandidatesStrategy(BasePrvCandidatesStrategy):
         forced_phot_sources["psFluxErr"] = (
             forced_phot_sources["psFluxErr"] * self._factor
         )
-        forced_phot_sources["diaForcedSourceId"] = forced_phot_sources["diaForcedSourceId"].astype(int)
+        forced_phot_sources["diaForcedSourceId"] = forced_phot_sources[
+            "diaForcedSourceId"
+        ].astype(int)
         forced_phot_sources["extra_fields"] = forced_phot_sources[
             self._extra_fields
         ].to_dict("records")
