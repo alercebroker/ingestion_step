@@ -77,8 +77,9 @@ EXTRA_FIELDS = {
         "double",
         "bytes",
         {
-            "type": "map", "values": ["string", "float", "null", "int"],
-        }
+            "type": "map",
+            "values": ["string", "float", "null", "int"],
+        },
     ],
 }
 
@@ -103,7 +104,7 @@ DETECTIONS = {
             {"name": "rb", "type": ["float", "null"]},
             {"name": "rbversion", "type": ["string", "null"]},
             {"name": "corrected", "type": "boolean"},
-            {"name": "extra_fields", "type": EXTRA_FIELDS}
+            {"name": "extra_fields", "type": EXTRA_FIELDS},
         ],
     },
 }
@@ -119,7 +120,7 @@ NON_DETECTIONS = {
             {"name": "mjd", "type": "double"},
             {"name": "diffmaglim", "type": "float"},
             {"name": "fid", "type": "int"},
-            {"name": "extra_fields", "type": [EXTRA_FIELDS, "null"]}
+            {"name": "extra_fields", "type": [EXTRA_FIELDS, "null"]},
         ],
     },
 }
@@ -139,6 +140,6 @@ SCHEMA = {
         {"name": "non_detections", "type": NON_DETECTIONS},
         {"name": "metadata", "type": [METADATA, "null"]},
         {"name": "elasticcPublishTimestamp", "type": "long"},
-        {"name": "brokerIngestTimestamp", "type": "long"}
+        {"name": "brokerIngestTimestamp", "type": "long"},
     ],
 }

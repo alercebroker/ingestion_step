@@ -99,7 +99,15 @@ OLD_DET_KEYS = [
     "has_stamp",
     "step_id_corr",
 ]
-NON_DET_KEYS = ["aid", "tid", "mjd", "diffmaglim", "fid", "oid", "extra_fields"]
+NON_DET_KEYS = [
+    "aid",
+    "tid",
+    "mjd",
+    "diffmaglim",
+    "fid",
+    "oid",
+    "extra_fields",
+]
 COR_KEYS = ["magpsf_corr", "sigmapsf_corr", "sigmapsf_corr_ext"]
 SS_KEYS = ["oid", "candid", "ssdistnr", "ssmagnr", "ssnamenr"]
 

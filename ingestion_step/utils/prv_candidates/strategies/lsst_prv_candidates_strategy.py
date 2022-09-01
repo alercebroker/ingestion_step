@@ -85,7 +85,13 @@ class LSSTPrvCandidatesStrategy(BasePrvCandidatesStrategy):
         "z": 4,
         "Y": 5,
     }
-    _extra_fields = ["diaForcedSourceId", "ccdVisitId", "psFluxErr", "totFlux", "totFluxErr"]
+    _extra_fields = [
+        "diaForcedSourceId",
+        "ccdVisitId",
+        "psFluxErr",
+        "totFlux",
+        "totFluxErr",
+    ]
 
     def process_prv_candidates(self, alerts: pd.DataFrame):
         detections = {}
@@ -146,6 +152,8 @@ class LSSTPrvCandidatesStrategy(BasePrvCandidatesStrategy):
         forced_phot_sources["psFluxErr"] = (
             forced_phot_sources["psFluxErr"] * self._factor
         )
-        forced_phot_sources["extra_fields"] = forced_phot_sources[self._extra_fields].to_dict("records")
+        forced_phot_sources["extra_fields"] = forced_phot_sources[
+            self._extra_fields
+        ].to_dict("records")
         forced_phot_sources.drop(columns=self._extra_fields, inplace=True)
         return detections, forced_phot_sources
