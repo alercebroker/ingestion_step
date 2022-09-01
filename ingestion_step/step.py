@@ -615,7 +615,7 @@ class IngestionStep(GenericStep):
             the_object = objects.loc[_key]
             output_message = {
                 "aid": str(aid),
-                "alertId": str(row["alertId"]),
+                "alertId": row["alertId"],
                 "meanra": the_object["meanra"],
                 "meandec": the_object["meandec"],
                 "ndet": the_object["ndet"],

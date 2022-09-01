@@ -66,6 +66,23 @@ METADATA = {
     ],
 }
 
+EXTRA_FIELDS = {
+    "type": "map",
+    "values": [
+        "string",
+        "int",
+        "null",
+        "float",
+        "boolean",
+        "double",
+        "bytes",
+        {
+            "type": "map",
+            "values": ["string", "float", "null", "int"],
+        },
+    ],
+}
+
 DETECTIONS = {
     "type": "array",
     "items": {
@@ -87,24 +104,7 @@ DETECTIONS = {
             {"name": "rb", "type": ["float", "null"]},
             {"name": "rbversion", "type": ["string", "null"]},
             {"name": "corrected", "type": "boolean"},
-            {
-                "name": "extra_fields",
-                "type": {
-                    "type": "map",
-                    "values": [
-                        "string",
-                        "int",
-                        "null",
-                        "float",
-                        "boolean",
-                        "double",
-                        "bytes",
-                        {
-                            "type": "map", "values": ["string", "float", "null", "int"],
-                        }
-                    ],
-                },
-            },
+            {"name": "extra_fields", "type": EXTRA_FIELDS},
         ],
     },
 }
@@ -120,6 +120,7 @@ NON_DETECTIONS = {
             {"name": "mjd", "type": "double"},
             {"name": "diffmaglim", "type": "float"},
             {"name": "fid", "type": "int"},
+            {"name": "extra_fields", "type": [EXTRA_FIELDS, "null"]},
         ],
     },
 }
@@ -130,7 +131,7 @@ SCHEMA = {
     "type": "record",
     "fields": [
         {"name": "aid", "type": "string"},
-        {"name": "alertId", "type": "string"},
+        {"name": "alertId", "type": "int"},
         {"name": "candid", "type": ["string", "long"]},
         {"name": "meanra", "type": "float"},
         {"name": "meandec", "type": "float"},
@@ -139,6 +140,6 @@ SCHEMA = {
         {"name": "non_detections", "type": NON_DETECTIONS},
         {"name": "metadata", "type": [METADATA, "null"]},
         {"name": "elasticcPublishTimestamp", "type": "long"},
-        {"name": "brokerIngestTimestamp", "type": "long"}
+        {"name": "brokerIngestTimestamp", "type": "long"},
     ],
 }
