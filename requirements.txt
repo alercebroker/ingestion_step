@@ -2,8 +2,6 @@ apf_base==1.0.7
 numpy
 pymongo
 
-
-
 git+https://github.com/alercebroker/lc_correction
 git+https://github.com/alercebroker/survey-parser-plugins@elasticc
-git+https://github.com/alercebroker/db-plugins@feature/mongo-connection-arguments
+git+https://git@github.com/alercebroker/db-plugins@6dd808d#egg=db-plugins
