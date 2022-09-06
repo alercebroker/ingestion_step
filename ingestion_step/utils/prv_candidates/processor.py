@@ -1,6 +1,8 @@
 from __future__ import annotations
-from .strategies.base_prv_candidates_strategy import BasePrvCandidatesStrategy
+
 import pandas as pd
+
+from .strategies.base_prv_candidates_strategy import BasePrvCandidatesStrategy
 
 
 class Processor:

@@ -1,12 +1,19 @@
-from .base_prv_candidates_strategy import BasePrvCandidatesStrategy
+import pickle
 from typing import List
-from survey_parser_plugins.core import SurveyParser
 
 import pandas as pd
-import pickle
+from survey_parser_plugins.core import SurveyParser
+
+from .base_prv_candidates_strategy import BasePrvCandidatesStrategy
 
 # Keys used on non detections for ZTF
 NON_DET_KEYS = ["aid", "tid", "oid", "mjd", "diffmaglim", "fid"]
+FORCED_PHOT_TO_NON_DET = {
+    "filterName": "fid",
+    "diaObjectId": "oid",
+    "midPointTai": "mjd",
+    "psFlux": "diffmaglim",
+}
 
 
 class LSSTPreviousCandidatesParser(SurveyParser):
@@ -55,6 +62,7 @@ class LSSTPreviousCandidatesParser(SurveyParser):
         prv_content["e_dec"] = 0.001
         prv_content["pid"] = 0
         prv_content["fid"] = cls._fid_mapper[prv_candidate["filterName"]]
+        prv_content["alertId"] = message["alertId"]
         return prv_content
 
     @classmethod
@@ -67,12 +75,32 @@ class LSSTPreviousCandidatesParser(SurveyParser):
 
 
 class LSSTPrvCandidatesStrategy(BasePrvCandidatesStrategy):
+    _source = "LSST"
+    _factor = 10 ** (-3.9 / 2.5)
+    _fid_mapper = {
+        "u": 0,
+        "g": 1,
+        "r": 2,
+        "i": 3,
+        "z": 4,
+        "Y": 5,
+    }
+    _extra_fields = [
+        "diaForcedSourceId",
+        "ccdVisitId",
+        "psFluxErr",
+        "totFlux",
+        "totFluxErr",
+    ]
+
     def process_prv_candidates(self, alerts: pd.DataFrame):
         detections = {}
+        forced_phot_sources = []
         for index, alert in alerts.iterrows():
             oid = alert["oid"]
             tid = alert["tid"]
             aid = alert["aid"]
+            alert_id = alert["alertId"]
             candid = alert["candid"]
             if alert["extra_fields"]["prvDiaSources"] is not None:
                 prv_candidates = pickle.loads(
@@ -87,14 +115,48 @@ class LSSTPrvCandidatesStrategy(BasePrvCandidatesStrategy):
                                 "aid": aid,
                                 "diaSource": prv,
                                 "parent_candid": candid,
+                                "alertId": alert_id,
                             }
                         }
                     )
                 del alert["extra_fields"]["prvDiaSources"]
+            if alert["extra_fields"]["prvDiaForcedSources"] is not None:
+                data = alert["extra_fields"]["prvDiaForcedSources"]
+                forced_phot = pickle.loads(data)
+                forced_phot_sources += forced_phot
+                del alert["extra_fields"]["prvDiaForcedSources"]
+
         detections = LSSTPreviousCandidatesParser.parse(
             list(detections.values())
         )
         detections = pd.DataFrame(detections)
-        non_detections = pd.DataFrame(columns=NON_DET_KEYS)
+        # The forced photometry is carried in non_detections fields
+        forced_phot_sources = (
+            pd.DataFrame(forced_phot_sources).rename(
+                columns=FORCED_PHOT_TO_NON_DET
+            )
+            if len(forced_phot_sources)
+            else pd.DataFrame(columns=NON_DET_KEYS)
+        )
+        # Process some fields of forced photometry
+        forced_phot_sources["fid"] = forced_phot_sources["fid"].apply(
+            lambda x: self._fid_mapper[x]
+        )
+        forced_phot_sources["tid"] = self._source
+        forced_phot_sources["oid"] = forced_phot_sources["oid"].astype(str)
+        forced_phot_sources["aid"] = forced_phot_sources["oid"]
 
-        return detections, non_detections
+        forced_phot_sources["diffmaglim"] = (
+            forced_phot_sources["diffmaglim"] * self._factor
+        )
+        forced_phot_sources["psFluxErr"] = (
+            forced_phot_sources["psFluxErr"] * self._factor
+        )
+        forced_phot_sources["diaForcedSourceId"] = forced_phot_sources[
+            "diaForcedSourceId"
+        ].astype(int)
+        forced_phot_sources["extra_fields"] = forced_phot_sources[
+            self._extra_fields
+        ].to_dict("records")
+        forced_phot_sources.drop(columns=self._extra_fields, inplace=True)
+        return detections, forced_phot_sources
