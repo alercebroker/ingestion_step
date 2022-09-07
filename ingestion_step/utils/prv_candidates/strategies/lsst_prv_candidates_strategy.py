@@ -138,25 +138,27 @@ class LSSTPrvCandidatesStrategy(BasePrvCandidatesStrategy):
             if len(forced_phot_sources)
             else pd.DataFrame(columns=NON_DET_KEYS)
         )
-        # Process some fields of forced photometry
-        forced_phot_sources["fid"] = forced_phot_sources["fid"].apply(
-            lambda x: self._fid_mapper[x]
-        )
-        forced_phot_sources["tid"] = self._source
-        forced_phot_sources["oid"] = forced_phot_sources["oid"].astype(str)
-        forced_phot_sources["aid"] = forced_phot_sources["oid"]
 
-        forced_phot_sources["diffmaglim"] = (
-            forced_phot_sources["diffmaglim"] * self._factor
-        )
-        forced_phot_sources["psFluxErr"] = (
-            forced_phot_sources["psFluxErr"] * self._factor
-        )
-        forced_phot_sources["diaForcedSourceId"] = forced_phot_sources[
-            "diaForcedSourceId"
-        ].astype(int)
-        forced_phot_sources["extra_fields"] = forced_phot_sources[
-            self._extra_fields
-        ].to_dict("records")
-        forced_phot_sources.drop(columns=self._extra_fields, inplace=True)
+        if not forced_phot_sources.empty:
+            # Process some fields of forced photometry
+            forced_phot_sources["fid"] = forced_phot_sources["fid"].apply(
+                lambda x: self._fid_mapper[x]
+            )
+            forced_phot_sources["tid"] = self._source
+            forced_phot_sources["oid"] = forced_phot_sources["oid"].astype(str)
+            forced_phot_sources["aid"] = forced_phot_sources["oid"]
+
+            forced_phot_sources["diffmaglim"] = (
+                forced_phot_sources["diffmaglim"] * self._factor
+            )
+            forced_phot_sources["psFluxErr"] = (
+                forced_phot_sources["psFluxErr"] * self._factor
+            )
+            forced_phot_sources["diaForcedSourceId"] = forced_phot_sources[
+                "diaForcedSourceId"
+            ].astype(int)
+            forced_phot_sources["extra_fields"] = forced_phot_sources[
+                self._extra_fields
+            ].to_dict("records")
+            forced_phot_sources.drop(columns=self._extra_fields, inplace=True)
         return detections, forced_phot_sources
