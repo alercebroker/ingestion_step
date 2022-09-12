@@ -804,6 +804,24 @@ class IngestionStep(GenericStep):
         del new_detections
         del new_non_detections
 
+    def add_flux_metrics(self, alerts: pd.DataFrame, detections: pd.DataFrame):
+        """
+        Add fluxes to metrics. So we can display the flux in grafana, kibana, etc.
+        Parameters
+        ----------
+        alerts: raw alerts from sorting hat
+        detections: corrected detections
+
+        Returns
+        -------
+
+        """
+        detections = detections[
+            detections["parent_candid"].isna()
+        ]  # get empirical detections (not get prev detections)
+        self.metrics["psFlux_raw"] = alerts["mag"].tolist()
+        self.metrics["psFlux_corrected"] = detections["mag"].tolist()
+
     def execute(self, messages):
         self.logger.info(f"Processing {len(messages)} alerts")
         alerts = pd.DataFrame(messages)
@@ -836,6 +854,7 @@ class IngestionStep(GenericStep):
         )
         # Do correction to detections from stream
         detections = self.correct(detections)
+        self.add_flux_metrics(alerts, detections)
         # Insert/update data on mongo and get metadata
         metadata = self.execute_psql(
             alerts.copy(),
