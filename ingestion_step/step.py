@@ -763,6 +763,31 @@ class IngestionStep(GenericStep):
         )
         return metadata
 
+    @classmethod
+    def remove_duplicates_forced_photometry(cls, light_curves: dict) -> dict:
+        unique_keys_detections = light_curves["detections"][
+            ["aid", "mjd", "fid"]
+        ]
+        unique_keys_forced_photometry = light_curves["non_detections"][
+            ["aid", "mjd", "fid"]
+        ]
+
+        unique_keys_detections["mjd"] = unique_keys_detections["mjd"].round(5)
+        unique_keys_forced_photometry["mjd"] = unique_keys_forced_photometry[
+            "mjd"
+        ].round(5)
+
+        index_detections = pd.MultiIndex.from_frame(unique_keys_detections)
+        index_forced_photometry = pd.MultiIndex.from_frame(
+            unique_keys_forced_photometry
+        )
+
+        duplicated = index_forced_photometry.isin(index_detections)
+        light_curves["non_detections"] = light_curves["non_detections"][
+            ~duplicated
+        ]
+        return light_curves
+
     def execute_mongo(
         self,
         alerts: pd.DataFrame,
@@ -776,6 +801,8 @@ class IngestionStep(GenericStep):
         light_curves = self.preprocess_lightcurves(
             detections, non_detections_prv_candidates
         )
+        # hack: remove old detections that comes into forced photometry
+        light_curves = self.remove_duplicates_forced_photometry(light_curves)
 
         # Getting other tables: retrieve existing objects
         # and create new objects
