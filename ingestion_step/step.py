@@ -788,7 +788,9 @@ class IngestionStep(GenericStep):
         ]  # remove detections contained in non detections
         light_curves["non_detections"] = light_curves[
             "non_detections"
-        ].drop_duplicates(["oid", "mjd", "fid"], keep="first")  # remove duplicated non detections
+        ].drop_duplicates(
+            ["oid", "mjd", "fid"], keep="first"
+        )  # remove duplicated non detections
         return light_curves
 
     def execute_mongo(
