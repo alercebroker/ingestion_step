@@ -14,7 +14,7 @@ from ingestion_step.utils.constants import (
     MAGSTATS_UPDATE_KEYS,
 )
 from typing import List
-from lc_correction.compute import (
+from .correction.lc_correction import (
     apply_mag_stats,
     get_flag_reference,
     get_flag_saturation,

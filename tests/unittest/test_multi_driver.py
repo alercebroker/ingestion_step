@@ -103,7 +103,7 @@ class MultiDriverTest(unittest.TestCase):
     @mock.patch("db_plugins.db.mongo.MongoConnection.query")
     def test_bulk_update_mongo(self, mongo_driver: mock.Mock):
         objects = generate_random_objects(10)
-        filter_by = [{"_id": x["aid"]} for x in objects]
+        filter_by = [{"_id": x["_id"]} for x in objects]
         self.driver.query("Object").bulk_update(objects, filter_by=filter_by)
         self.assertTrue(mongo_driver.called)
 

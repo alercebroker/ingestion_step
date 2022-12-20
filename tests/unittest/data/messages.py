@@ -327,14 +327,18 @@ def generate_random_objects(n):
     for i in range(n):
         ex = {
             "_id": f"ALERCE{i}",
-            "aid": f"ALERCE{i}",
             "oid": f"EX{i}",
+            "corrected": False,
+            "stellar": False,
             "meanra": random.uniform(0, 360),
+            "sigmara": random.uniform(0, 360),
             "meandec": random.uniform(-90, 90),
+            "sigmadec": random.uniform(-90, 90),
             "ndet": random.randint(1, 20),
             "firstmjd": random.uniform(59000, 60000),
             "lastmjd": random.uniform(59000, 60000) + random.uniform(1, 20),
             "extra_fields": {"e_ra": 0.0, "e_dec": 0.0, "tid": "EXAMPLE"},
+            "tid": [random.uniform(1,3)]
         }
         batch.append(ex)
     return batch
