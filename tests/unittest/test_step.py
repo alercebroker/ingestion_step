@@ -59,14 +59,18 @@ class StepTestCase(unittest.TestCase):
     def test_get_objects(self):
         oids = ["ZTF1", "ZTF2"]
         self.step.get_objects(oids)
-        self.step.driver.query("Object", engine="mongo").find_all.assert_called_with(
+        self.step.driver.query(
+            "Object", engine="mongo"
+        ).find_all.assert_called_with(
             filter_by={"aid": {"$in": oids}}, paginate=False
         )
 
     def test_get_detections(self):
         oids = [12345, 45678]
         self.step.get_detections(oids, engine="mongo")
-        self.step.driver.query("Detection", engine="mongo").find_all.assert_called_with(
+        self.step.driver.query(
+            "Detection", engine="mongo"
+        ).find_all.assert_called_with(
             filter_by={"aid": {"$in": oids}}, paginate=False
         )
 
@@ -96,8 +100,12 @@ class StepTestCase(unittest.TestCase):
         }
         df_objects = pd.DataFrame(objects)
         self.step.insert_objects(df_objects, engine="mongo")
-        self.step.driver.query("Object", engine="mongo").bulk_insert.assert_called()
-        self.step.driver.query("Object", engine="mongo").bulk_update.assert_not_called()
+        self.step.driver.query(
+            "Object", engine="mongo"
+        ).bulk_insert.assert_called()
+        self.step.driver.query(
+            "Object", engine="mongo"
+        ).bulk_update.assert_not_called()
         insert_call = self.step.driver.query(
             "Object", engine="mongo"
         ).bulk_insert.mock_calls[0]
@@ -207,16 +215,40 @@ class StepTestCase(unittest.TestCase):
         assert len(self.step.driver.query().bulk_insert.mock_calls) == 3
 
     def test_produce(self):
-        alerts = pd.DataFrame([{"aid": "a", "oid": "a", "candid": 1, "tid": 1}])
+        alerts = pd.DataFrame(
+            [{"aid": "a", "oid": "a", "candid": 1, "tid": 1}]
+        )
         objects = pd.DataFrame(
-            [{"aid": "a",  "oid": "a", "meanra": 1, "meandec": 1, "ndet": 1, "lastmjd": 1, "tid": "a"}]
+            [
+                {
+                    "aid": "a",
+                    "oid": "a",
+                    "meanra": 1,
+                    "meandec": 1,
+                    "ndet": 1,
+                    "lastmjd": 1,
+                    "tid": "a",
+                }
+            ]
         )
         light_curves = {
-            "detections": pd.DataFrame([{"aid": "a",  "oid": "a", "candid": 1, "new": True, "tid": "a"}]),
+            "detections": pd.DataFrame(
+                [
+                    {
+                        "aid": "a",
+                        "oid": "a",
+                        "candid": 1,
+                        "new": True,
+                        "tid": "a",
+                    }
+                ]
+            ),
             "non_detections": pd.DataFrame(
-                [{"aid": "a",  "oid": "a", "candid": None, "new": False}]
+                [{"aid": "a", "oid": "a", "candid": None, "new": False}]
             ),
         }
-        metadata = pd.DataFrame([{"aid": "a",  "oid": "a", "ps1": {}, "gaia": {}}])
+        metadata = pd.DataFrame(
+            [{"aid": "a", "oid": "a", "ps1": {}, "gaia": {}}]
+        )
         self.step.produce(alerts, objects, light_curves, metadata)
         self.assertEqual(len(self.step.producer.produce.mock_calls), 1)

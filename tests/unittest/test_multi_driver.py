@@ -2,7 +2,10 @@ import unittest
 
 from unittest import mock
 from ingestion_step.utils.multi_driver.connection import MultiDriverConnection
-from ingestion_step.utils.multi_driver.query import filter_to_psql, update_to_psql
+from ingestion_step.utils.multi_driver.query import (
+    filter_to_psql,
+    update_to_psql,
+)
 from db_plugins.db.sql.models import Object
 from sqlalchemy.sql.elements import BinaryExpression, BooleanClauseList
 from data.messages import generate_random_objects
@@ -73,7 +76,9 @@ class MultiDriverTest(unittest.TestCase):
         objects = generate_random_objects(10)
         filter_by = [{"_id": x["oid"]} for x in objects]
         self.driver.psql_driver.engine = mock.Mock()
-        self.driver.query("Object", engine="psql").bulk_update(objects, filter_by=filter_by)
+        self.driver.query("Object", engine="psql").bulk_update(
+            objects, filter_by=filter_by
+        )
         calls = self.driver.psql_driver.engine.mock_calls
         self.assertEqual(len(calls), 1)
 
@@ -137,7 +142,10 @@ class MultiDriverTest(unittest.TestCase):
         psql_filter = filter_to_psql(Object, filter_by)
         self.assertIsInstance(psql_filter, BinaryExpression)
 
-        filter_by = {"aid": {"$in": ["ZTF1", "ATLAS1", "BART1"]}, "firstmjd": 10}
+        filter_by = {
+            "aid": {"$in": ["ZTF1", "ATLAS1", "BART1"]},
+            "firstmjd": 10,
+        }
         psql_filter = filter_to_psql(Object, filter_by)
         self.assertIsInstance(psql_filter, BooleanClauseList)
 
@@ -146,7 +154,11 @@ class MultiDriverTest(unittest.TestCase):
         self.assertIsInstance(psql_filter, dict)
 
         with self.assertRaises(AttributeError) as e:
-            filter_by = {"attribute_that_no_exists": {"$in": ["ZTF1", "ATLAS1", "BART1"]}}
+            filter_by = {
+                "attribute_that_no_exists": {
+                    "$in": ["ZTF1", "ATLAS1", "BART1"]
+                }
+            }
             filter_to_psql(Object, filter_by)
         self.assertIsInstance(e.exception, AttributeError)
 

@@ -276,7 +276,9 @@ def generate_alerts_batch(n: int, same_objects: int = 10) -> List[dict]:
 
     """
     generators = [generate_message_ztf, generate_message_atlas]
-    sub_samples = random_sub_samples(n, len(generators))  # samples by generator
+    sub_samples = random_sub_samples(
+        n, len(generators)
+    )  # samples by generator
     batch = []
     for generator, m in zip(generators, sub_samples):
         alert = generator(m)
@@ -285,7 +287,9 @@ def generate_alerts_batch(n: int, same_objects: int = 10) -> List[dict]:
     # adjust to repeat some identifiers
     for al in range(n):
         batch[al]["aid"] = f"AL2X{str(al % same_objects).zfill(5)}"
-        batch[al]["oid"] = f"{batch[al]['tid']}2X{str(al % same_objects).zfill(5)}"
+        batch[al][
+            "oid"
+        ] = f"{batch[al]['tid']}2X{str(al % same_objects).zfill(5)}"
         batch[al]["candid"] = int(str(al + 1).ljust(6, "0"))
     random.shuffle(batch, lambda: 0.1)
     return batch
@@ -338,7 +342,7 @@ def generate_random_objects(n):
             "firstmjd": random.uniform(59000, 60000),
             "lastmjd": random.uniform(59000, 60000) + random.uniform(1, 20),
             "extra_fields": {"e_ra": 0.0, "e_dec": 0.0, "tid": "EXAMPLE"},
-            "tid": [random.uniform(1,3)]
+            "tid": [random.uniform(1, 3)],
         }
         batch.append(ex)
     return batch

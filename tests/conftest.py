@@ -17,7 +17,11 @@ def docker_compose_file(pytestconfig):
 def is_responsive_mongo(url):
     try:
         client = MongoClient(
-            "localhost", 27017, username="root", password="root", authSource="admin"
+            "localhost",
+            27017,
+            username="root",
+            password="root",
+            authSource="admin",
         )
         client.server_info()  # check connection
         # Create test test_user and test_db

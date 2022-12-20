@@ -7,7 +7,7 @@ SCORE_THRESHOLD = 0.4  #: max threshold for sgscore
 CHINR_THRESHOLD = 2  #: max threshold for chinr
 SHARPNR_MAX = 0.1  #: max value for sharpnr
 SHARPNR_MIN = -0.13  #: min value for sharpnr
-ZERO_MAG = 100.  #: default value for zero magnitude (a big value!)
+ZERO_MAG = 100.0  #: default value for zero magnitude (a big value!)
 TRIPLE_NAN = (np.nan, np.nan, np.nan)
 MAGNITUDE_THRESHOLD = 13.2
 
@@ -20,13 +20,15 @@ SCORE_THRESHOLD = 0.4  #: max threshold for sgscore
 CHINR_THRESHOLD = 2  #: max threshold for chinr
 SHARPNR_MAX = 0.1  #: max value for sharpnr
 SHARPNR_MIN = -0.13  #: min value for sharpnr
-ZERO_MAG = 100.  #: default value for zero magnitude (a big value!)
+ZERO_MAG = 100.0  #: default value for zero magnitude (a big value!)
 TRIPLE_NAN = (np.nan, np.nan, np.nan)
 MAGNITUDE_THRESHOLD = 13.2
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s %(levelname)s %(name)s.%(funcName)s: %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S',)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s.%(funcName)s: %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 
 def correction(magnr, magpsf, sigmagnr, sigmapsf, isdiffpos, oid=None):
@@ -51,8 +53,8 @@ def correction(magnr, magpsf, sigmagnr, sigmapsf, isdiffpos, oid=None):
         return TRIPLE_NAN
 
     try:
-        aux1 = 10**(-0.4 * magnr)
-        aux2 = 10**(-0.4 * magpsf)
+        aux1 = 10 ** (-0.4 * magnr)
+        aux2 = 10 ** (-0.4 * magpsf)
         aux3 = aux1 + isdiffpos * aux2
         if aux3 > 0:
             magpsf_corr = -2.5 * np.log10(aux3)
@@ -72,7 +74,7 @@ def correction(magnr, magpsf, sigmagnr, sigmapsf, isdiffpos, oid=None):
         return magpsf_corr, sigmapsf_corr, sigmapsf_corr_ext
 
     except Exception as e:
-        logging.error('Object {}: {}'.format(oid, e))
+        logging.error("Object {}: {}".format(oid, e))
         return TRIPLE_NAN
 
 
@@ -88,16 +90,20 @@ def apply_correction(candidate):
     """
     isdiffpos = 1 if (candidate["isdiffpos"] in ["t", "1"]) else -1
     magnr = candidate["magnr"]
-    magpsf = candidate['magpsf']
-    sigmagnr = candidate['sigmagnr']
-    sigmapsf = candidate['sigmapsf']
+    magpsf = candidate["magpsf"]
+    sigmagnr = candidate["sigmagnr"]
+    sigmapsf = candidate["sigmapsf"]
 
-    magpsf_corr, sigmapsf_corr, sigmapsf_corr_ext = correction(magnr, magpsf, sigmagnr, sigmapsf, isdiffpos)
+    magpsf_corr, sigmapsf_corr, sigmapsf_corr_ext = correction(
+        magnr, magpsf, sigmagnr, sigmapsf, isdiffpos
+    )
 
     return magpsf_corr, sigmapsf_corr, sigmapsf_corr_ext
 
 
-def near_stellar(first_distnr, first_distpsnr1, first_sgscore1, first_chinr, first_sharpnr):
+def near_stellar(
+    first_distnr, first_distpsnr1, first_sgscore1, first_chinr, first_sharpnr
+):
     """
     Get if object is near stellar
     :param first_distnr: Distance to nearest source in reference image PSF-catalog within 30 arcsec [pixels]
@@ -117,7 +123,10 @@ def near_stellar(first_distnr, first_distpsnr1, first_sgscore1, first_chinr, fir
     nearZTF = 0 <= first_distnr < DISTANCE_THRESHOLD
     nearPS1 = 0 <= first_distpsnr1 < DISTANCE_THRESHOLD
     stellarPS1 = first_sgscore1 > SCORE_THRESHOLD
-    stellarZTF = first_chinr < CHINR_THRESHOLD and SHARPNR_MIN < first_sharpnr < SHARPNR_MAX
+    stellarZTF = (
+        first_chinr < CHINR_THRESHOLD
+        and SHARPNR_MIN < first_sharpnr < SHARPNR_MAX
+    )
     return nearZTF, nearPS1, stellarPS1, stellarZTF
 
 
@@ -149,7 +158,11 @@ def is_dubious(corrected, isdiffpos, corr_magstats):
     :return: if the object is dubious
     :rtype: bool
     """
-    return (~corrected & (isdiffpos == -1)) | (corr_magstats & ~corrected) | (~corr_magstats & corrected)
+    return (
+        (~corrected & (isdiffpos == -1))
+        | (corr_magstats & ~corrected)
+        | (~corr_magstats & corrected)
+    )
 
 
 def dmdt(magpsf_first, sigmapsf_first, nd_diffmaglim, mjd_first, nd_mjd):
@@ -176,17 +189,13 @@ def dmdt(magpsf_first, sigmapsf_first, nd_diffmaglim, mjd_first, nd_mjd):
     """
     dm_sigma = magpsf_first + sigmapsf_first - nd_diffmaglim
     dt = mjd_first - nd_mjd
-    dmsigdt = (dm_sigma / dt)
-    frame = {
-        "dm_sigma": dm_sigma,
-        "dt": dt,
-        "dmsigdt": dmsigdt
-    }
+    dmsigdt = dm_sigma / dt
+    frame = {"dm_sigma": dm_sigma, "dt": dt, "dmsigdt": dmsigdt}
     df = pd.DataFrame(frame)
     return df
 
 
-def apply_correction_df(df, calculate_dubious = False):
+def apply_correction_df(df, calculate_dubious=False):
     """
     Correction function for a set of detections with the same object id and filter id. Use with pd.DataFrame.apply(this)
     :param df: A dataframe with detections of a candidate.
@@ -199,30 +208,43 @@ def apply_correction_df(df, calculate_dubious = False):
 
     df.set_index("candid", inplace=True)
 
-    df['isdiffpos'] = df['isdiffpos'].map({'t': 1., 'f': -1., '1': 1., '0': -1.})
+    df["isdiffpos"] = df["isdiffpos"].map(
+        {"t": 1.0, "f": -1.0, "1": 1.0, "0": -1.0}
+    )
     df["corrected"] = df["distnr"] < DISTANCE_THRESHOLD
     correction_results = df.apply(
-        lambda x: correction(x.magnr, x.magpsf, x.sigmagnr, x.sigmapsf, x.isdiffpos, x.objectId)
+        lambda x: correction(
+            x.magnr, x.magpsf, x.sigmagnr, x.sigmapsf, x.isdiffpos, x.objectId
+        )
         if x["corrected"]
-        else (np.nan, np.nan, np.nan), axis=1, result_type="expand")
+        else (np.nan, np.nan, np.nan),
+        axis=1,
+        result_type="expand",
+    )
 
-    df["magpsf_corr"], df["sigmapsf_corr"], df["sigmapsf_corr_ext"] = correction_results[0], correction_results[1], correction_results[2]
+    df["magpsf_corr"], df["sigmapsf_corr"], df["sigmapsf_corr_ext"] = (
+        correction_results[0],
+        correction_results[1],
+        correction_results[2],
+    )
     df["mjdendref"] = df["jdendref"] - 2400000.5
 
     if calculate_dubious:
         corr_magstats = df.loc[df.index.min()]["corrected"]
-        df["dubious"] = is_dubious(df["corrected"], df['isdiffpos'], corr_magstats)
+        df["dubious"] = is_dubious(
+            df["corrected"], df["isdiffpos"], corr_magstats
+        )
 
     return df.drop(["objectId", "fid"], axis=1)
 
 
 def get_flag_saturation(detections):
     detections = detections[detections.corrected]
-    total = detections['magpsf_corr'].count()
+    total = detections["magpsf_corr"].count()
     if total == 0:
         return np.nan
     satured = (detections["magpsf_corr"] < MAGNITUDE_THRESHOLD).sum()
-    return satured/total
+    return satured / total
 
 
 def get_flag_reference(detections, first_detection):
@@ -232,7 +254,15 @@ def get_flag_reference(detections, first_detection):
     return last_reference > first_detection
 
 
-def apply_mag_stats(df, distnr=None, distpsnr1=None, sgscore1=None, chinr=None, sharpnr=None, flags=False):
+def apply_mag_stats(
+    df,
+    distnr=None,
+    distpsnr1=None,
+    sgscore1=None,
+    chinr=None,
+    sharpnr=None,
+    flags=False,
+):
     """
     :param df: A dataframe with corrected detections of a candidate.
     :type df: :py:class:`pd.DataFrame`
@@ -260,7 +290,7 @@ def apply_mag_stats(df, distnr=None, distpsnr1=None, sgscore1=None, chinr=None, 
     df_max = df.iloc[idxmax]
 
     # corrected at the first detection?
-    response['corrected'] = df_min["corrected"]
+    response["corrected"] = df_min["corrected"]
 
     distnr = df_min.distnr if distnr is None else distnr
     distpsnr1 = df_min.distpsnr1 if distpsnr1 is None else distpsnr1
@@ -268,12 +298,18 @@ def apply_mag_stats(df, distnr=None, distpsnr1=None, sgscore1=None, chinr=None, 
     chinr = df_min.chinr if chinr is None else chinr
     sharpnr = df_min.sharpnr if sharpnr is None else sharpnr
 
-    response["nearZTF"], response["nearPS1"], response["stellarZTF"], response["stellarPS1"] = near_stellar(distnr,
-                                                                                                            distpsnr1,
-                                                                                                            sgscore1,
-                                                                                                            chinr,
-                                                                                                            sharpnr)
-    response["stellar"] = is_stellar(response["nearZTF"], response["nearPS1"], response["stellarZTF"], response["stellarPS1"])
+    (
+        response["nearZTF"],
+        response["nearPS1"],
+        response["stellarZTF"],
+        response["stellarPS1"],
+    ) = near_stellar(distnr, distpsnr1, sgscore1, chinr, sharpnr)
+    response["stellar"] = is_stellar(
+        response["nearZTF"],
+        response["nearPS1"],
+        response["stellarZTF"],
+        response["stellarPS1"],
+    )
     # number of detections and dubious detections
     response["ndet"] = df.shape[0]
     response["ndubious"] = df.dubious.sum()
@@ -351,8 +387,11 @@ def apply_objstats_from_correction(df, flags=False):
     # flags
     if flags:
         response["diffpos"] = df.isdiffpos.min() > 0
-        response["reference_change"] = get_flag_reference(df, response["firstmjd"])
+        response["reference_change"] = get_flag_reference(
+            df, response["firstmjd"]
+        )
     return pd.Series(response)
+
 
 def apply_objstats_from_magstats(df):
     """
@@ -367,7 +406,9 @@ def apply_objstats_from_magstats(df):
     response["stellar"] = df.stellar.all()
     response["corrected"] = df.corrected.all()
     response["ndet"] = df.ndet.sum()  # sum of detections in all bands
-    response["ndubious"] = df.ndubious.sum()  # sum of dubious corrections in all bands
+    response[
+        "ndubious"
+    ] = df.ndubious.sum()  # sum of dubious corrections in all bands
     fids = df.fid.unique()
     if 1 in fids and 2 in fids:
         df.set_index("fid", inplace=True)
@@ -376,7 +417,9 @@ def apply_objstats_from_magstats(df):
         response["g-r_max"] = g["magpsf_min"] - r["magpsf_min"]  # 1=g ; 2=r
         response["g-r_max_corr"] = g["magpsf_corr_min"] - r["magpsf_corr_min"]
         response["g-r_mean"] = g["magpsf_mean"] - r["magpsf_mean"]
-        response["g-r_mean_corr"] = g["magpsf_corr_mean"] - r["magpsf_corr_mean"]
+        response["g-r_mean_corr"] = (
+            g["magpsf_corr_mean"] - r["magpsf_corr_mean"]
+        )
     else:
         response["g-r_max"] = np.nan
         response["g-r_max_corr"] = np.nan
@@ -396,9 +439,15 @@ def apply_object_stats_df(corrected, magstats, step_name=None, flags=False):
     :return: Object statistics in a dataframe
     :rtype: :py:class:`pd.DataFrame`
     """
-    basic_stats = corrected.groupby("objectId").apply(apply_objstats_from_correction, flags=flags)
-    obj_magstats = magstats.groupby("objectId").apply(apply_objstats_from_magstats)
-    basic_stats['step_id_corr'] = 'corr_bulk_0.0.1' if step_name is None else step_name
+    basic_stats = corrected.groupby("objectId").apply(
+        apply_objstats_from_correction, flags=flags
+    )
+    obj_magstats = magstats.groupby("objectId").apply(
+        apply_objstats_from_magstats
+    )
+    basic_stats["step_id_corr"] = (
+        "corr_bulk_0.0.1" if step_name is None else step_name
+    )
     return basic_stats.join(obj_magstats)
 
 
@@ -420,19 +469,27 @@ def do_dmdt(df, dt_min=0.5):
     mask = df.mjd < (mjd_first - dt_min)
     df_masked = df.loc[mask]
 
-    response["close_nondet"] = df_masked.mjd.max() < df.loc[df.mjd < mjd_first, "mjd"].max()
+    response["close_nondet"] = (
+        df_masked.mjd.max() < df.loc[df.mjd < mjd_first, "mjd"].max()
+    )
     # is there some non-detection before the first detection
     if mask.sum() > 0:
         magpsf_first = magstat_data.magpsf_first
         sigmapsf_first = magstat_data.sigmapsf_first
-        dmdts = dmdt(magpsf_first,
-                     sigmapsf_first,
-                     df_masked.diffmaglim,
-                     mjd_first,
-                     df_masked.mjd)
+        dmdts = dmdt(
+            magpsf_first,
+            sigmapsf_first,
+            df_masked.diffmaglim,
+            mjd_first,
+            df_masked.mjd,
+        )
         idxmin = dmdts.dmsigdt.idxmin()
         min_dmdts = dmdts.loc[idxmin]
-        min_dmdts = min_dmdts if isinstance(min_dmdts, pd.Series) else min_dmdts.iloc[0]
+        min_dmdts = (
+            min_dmdts
+            if isinstance(min_dmdts, pd.Series)
+            else min_dmdts.iloc[0]
+        )
         min_nd = df.loc[idxmin]
         min_nd = min_nd if isinstance(min_nd, pd.Series) else min_nd.iloc[0]
 
@@ -457,10 +514,14 @@ def do_dmdt_df(magstats, non_dets, dt_min=0.5):
     :return: Compute of dmdt of an object in a dataframe
     :rtype: :py:class:`pd.DataFrame`
     """
-    magstats.set_index(["objectId", "fid"],inplace=True)
-    non_dets_magstats = non_dets.join(magstats, on=["objectId", "fid"], how="inner", rsuffix="_stats")
+    magstats.set_index(["objectId", "fid"], inplace=True)
+    non_dets_magstats = non_dets.join(
+        magstats, on=["objectId", "fid"], how="inner", rsuffix="_stats"
+    )
 
     apply_dmdt_df = lambda x: do_dmdt(x, dt_min=dt_min)
-    result = non_dets_magstats.groupby(["objectId", "fid"]).apply(apply_dmdt_df)
+    result = non_dets_magstats.groupby(["objectId", "fid"]).apply(
+        apply_dmdt_df
+    )
     magstats.reset_index(inplace=True)
     return result

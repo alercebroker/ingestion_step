@@ -1,6 +1,6 @@
 apf_base==1.0.7
 numpy
-pymongo
+pymongo==4.3.3
 
 git+https://github.com/alercebroker/survey-parser-plugins@1.0.0
 git+https://github.com/alercebroker/db-plugins@4.0.1
