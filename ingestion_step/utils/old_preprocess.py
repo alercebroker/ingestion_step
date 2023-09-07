@@ -337,6 +337,7 @@ def do_magstats(
         new_magstats = det_ps1_ref.groupby(["oid", "fid"], sort=False).apply(
             apply_mag_stats
         )
+        new_magstats["ndubious"].replace({False: 0}, inplace=True)
     new_magstats.reset_index(inplace=True)
     new_magstats_index = pd.MultiIndex.from_frame(new_magstats[["oid", "fid"]])
     new_magstats["new"] = ~new_magstats_index.isin(magstats_index)
